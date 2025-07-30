@@ -14,10 +14,6 @@ public class TaskMapper {
         task.setStatus(dto.getStatus());
         task.setPriority(dto.getPriority());
 
-        User user = new User();
-        user.setId(dto.getUserId());
-        task.setUser(user);
-
         return task;
     }
 

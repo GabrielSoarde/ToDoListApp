@@ -52,11 +52,12 @@ public class TaskController {
 
     @PostMapping
     public ResponseEntity<TaskResponseDTO> createTask(@RequestBody @Valid TaskDTO dto, @AuthenticationPrincipal UserDetails userDetails) {
-        User user = userRepository.findByUsername(userDetails.getUsername())
+        User user = userRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
         Task task = TaskMapper.toEntity(dto);
         task.setUser(user);
+
         Task saved = taskRepository.save(task);
         return ResponseEntity.ok(TaskMapper.toDTO(saved));
     }
