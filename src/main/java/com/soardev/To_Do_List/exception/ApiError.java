@@ -8,9 +8,9 @@ public class ApiError {
     private int status;
     private String message;
     private LocalDateTime timestamp;
-    private List<String> errors;
+    private List<Object> errors;
 
-    public ApiError(int status, String message, List<String> errors){
+    public ApiError(int status, String message, List<Object> errors){
         this.status = status;
         this.message = message;
         this.errors = errors;
@@ -41,11 +41,11 @@ public class ApiError {
         this.timestamp = timestamp;
     }
 
-    public List<String> getErrors() {
+    public List<Object> getErrors() {
         return errors;
     }
 
-    public void setErrors(List<String> errors) {
+    public void setErrors(List<Object> errors) {
         this.errors = errors;
     }
 }

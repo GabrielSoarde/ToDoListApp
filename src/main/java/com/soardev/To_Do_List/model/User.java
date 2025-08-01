@@ -2,6 +2,8 @@ package com.soardev.To_Do_List.model;
 
 import com.soardev.To_Do_List.enums.UserRole;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "tb_user")
@@ -12,8 +14,11 @@ public class User {
     private Long id;
 
     @Column(unique = true)
+    @NotBlank(message = "Email obrigatório!")
+    @Email(message = "Formato de email inválido!")
     private String email;
 
+    @NotBlank(message = "Senha é obrigatória!")
     private String password;
 
     private String role;

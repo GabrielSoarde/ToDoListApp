@@ -4,6 +4,7 @@ import com.soardev.To_Do_List.DTO.AuthRequest;
 import com.soardev.To_Do_List.model.User;
 import com.soardev.To_Do_List.repository.UserRepository;
 import com.soardev.To_Do_List.security.JwtService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -33,7 +34,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody AuthRequest req) {
+    public ResponseEntity<?> register(@Valid @RequestBody AuthRequest req) {
         if (repo.existsByEmail(req.getEmail())) {
             return ResponseEntity.badRequest().body("E-mail já em uso.");
         }

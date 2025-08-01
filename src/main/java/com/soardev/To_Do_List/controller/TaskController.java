@@ -3,6 +3,8 @@ package com.soardev.To_Do_List.controller;
 import com.soardev.To_Do_List.DTO.TaskDTO;
 import com.soardev.To_Do_List.DTO.TaskMapper;
 import com.soardev.To_Do_List.DTO.TaskResponseDTO;
+import com.soardev.To_Do_List.exception.AccessDeniedException;
+import com.soardev.To_Do_List.exception.ResourceNotFoundException;
 import com.soardev.To_Do_List.model.Task;
 import com.soardev.To_Do_List.model.User;
 import com.soardev.To_Do_List.repository.TaskRepository;
@@ -40,14 +42,14 @@ public class TaskController {
 
     @GetMapping("/{id}")
     public ResponseEntity<TaskResponseDTO> getTaskById(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
-        Optional<Task> taskOpt = taskRepository.findById(id);
-        if (taskOpt.isPresent()) {
-            Task task = taskOpt.get();
-            if (task.getUser().getEmail().equals(userDetails.getUsername())) {
-                return ResponseEntity.ok(TaskMapper.toDTO(task));
-            }
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Task com o id " + id + " não encontrada!"));
+
+        if (!task.getUser().getEmail().equals(userDetails.getUsername())) {
+            throw new AccessDeniedException("Você não tem permissão para acessar esta task.");
         }
-        return ResponseEntity.status(403).build();
+
+        return ResponseEntity.ok(TaskMapper.toDTO(task));
     }
 
     @PostMapping
@@ -64,36 +66,33 @@ public class TaskController {
 
     @PutMapping("/{id}")
     public ResponseEntity<TaskResponseDTO> updateTask(@PathVariable Long id, @RequestBody @Valid TaskDTO dto, @AuthenticationPrincipal UserDetails userDetails) {
-        Optional<Task> taskOpt = taskRepository.findById(id);
-        if (taskOpt.isPresent()) {
-            Task task = taskOpt.get();
-            if (!task.getUser().getEmail().equals(userDetails.getUsername())) {
-                return ResponseEntity.status(403).build();
-            }
+        Task task = taskRepository.findById(id)
+                .orElseThrow(()-> new ResourceNotFoundException("Task com o id " + id + " não encontrada!"));
 
-            task.setTitle(dto.getTitle());
-            task.setDescription(dto.getDescription());
-            task.setDueDate(dto.getDueDate());
-            task.setStatus(dto.getStatus());
-            task.setPriority(dto.getPriority());
-
-            Task updated = taskRepository.save(task);
-            return ResponseEntity.ok(TaskMapper.toDTO(updated));
+        if(!task.getUser().getEmail().equals(userDetails.getUsername())) {
+            throw new AccessDeniedException("Você não tem permissão para atualizar essa task!");
         }
-        return ResponseEntity.notFound().build();
+
+        task.setTitle(dto.getTitle());
+        task.setDescription(dto.getDescription());
+        task.setDueDate(dto.getDueDate());
+        task.setStatus(dto.getStatus());
+        task.setPriority(dto.getPriority());
+
+        Task updated = taskRepository.save(task);
+        return ResponseEntity.ok(TaskMapper.toDTO(updated));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTask(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
-        Optional<Task> taskOpt = taskRepository.findById(id);
-        if (taskOpt.isPresent()) {
-            Task task = taskOpt.get();
-            if (!task.getUser().getEmail().equals(userDetails.getUsername())) {
-                return ResponseEntity.status(403).build();
-            }
-            taskRepository.delete(task);
-            return ResponseEntity.noContent().build();
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Task com o id " + id + " não encontrada!"));
+
+        if (!task.getUser().getEmail().equals(userDetails.getUsername())) {
+            throw new AccessDeniedException("Você não tem permissão para deletar esta task.");
         }
-        return ResponseEntity.notFound().build();
+
+        taskRepository.delete(task);
+        return ResponseEntity.noContent().build();
     }
 }
